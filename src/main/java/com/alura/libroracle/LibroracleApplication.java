@@ -1,18 +1,26 @@
 package com.alura.libroracle;
 
-import com.alura.libroracle.service.ConsumoAPI;
+import com.alura.libroracle.principal.Principal;
+import com.alura.libroracle.repository.LibroRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class LibroracleApplication {
+public class LibroracleApplication implements CommandLineRunner {
+	@Autowired
+	private LibroRepository repository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(LibroracleApplication.class, args);
 
-		ConsumoAPI consumoAPI = new ConsumoAPI();
-		String json = consumoAPI.obtenerDatos("https://gutendex.com/books/");
-		System.out.println(json);
+	}
+	@Override
+	public void run(String... args) throws Exception {
+		Principal principal = new Principal(repository);
+		principal.muestraElMenu();
+
 	}
 
 
