@@ -79,7 +79,7 @@ public class Autor {
                 "Fecha de fallecimiento: " + deceso+'\n'+
                 "Libros: "+libros.stream()
                     .map(l->l.getTitulo())
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList())+'\n';
 
     }
 }

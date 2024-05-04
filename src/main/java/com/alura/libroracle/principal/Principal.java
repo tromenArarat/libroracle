@@ -11,6 +11,7 @@ import com.alura.libroracle.service.ConvierteDatos;
 import com.alura.libroracle.service.ConvierteDatosAutor;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Principal {
 
@@ -25,6 +26,8 @@ public class Principal {
     private List<Libro> libros;
     private List<Autor> autores;
 
+    private Optional<Autor> autorBuscado;
+
 
     public void muestraElMenu() {
         var opcion = -1;
@@ -35,7 +38,12 @@ public class Principal {
                     2- listar libros registrados
                     3- listar autorxs registrados
                     4- listar autorxs vivos en un determinado año
-                    5- listar libros por idioma                                  
+                    5- listar libros por idioma
+                    -- - - - EXTRAS - - - - 
+                    6- buscar autorxs por nombre
+                    7- top 10 libros en la API
+                    8- top 5 libros en mi la DB
+                    9- autores en derecho público                                  
                     0 - Salir
                     """;
             System.out.println(menu);
@@ -53,10 +61,22 @@ public class Principal {
                     mostrarAutorxsRegistradxs();
                     break;
                 case 4:
-//                    mostrarAutorxsVivxsEnUnDeterminadoAno();
+                    mostrarAutorxsVivxsEnUnDeterminadoAno();
                     break;
                 case 5:
-//                    listarLibrosPorIdioma();
+                    listarLibrosPorIdioma();
+                    break;
+                case 6:
+                    buscarAutorPorNombre();
+                    break;
+                case 7:
+                    top10LibrosEnLaAPI();
+                    break;
+                case 8:
+                    top5LibrosEnLaDB();
+                    break;
+                case 9:
+                    autoresEnDerechoPublico();
                     break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
@@ -188,7 +208,142 @@ private String pregunta() {
                 .forEach(System.out::println);
     }
 
+    public void mostrarAutorxsVivxsEnUnDeterminadoAno(){
+        System.out.println("Ingrese un año");
+        int anio = teclado.nextInt();
+        autores = repositorio2.findAll();
+        List<String> autoresNombre = autores.stream()
+                .filter(a->a.getDeceso()<anio&&a.getNacimiento()>anio)
+                .map(a->a.getNombre())
+                .collect(Collectors.toList());
+        autoresNombre.forEach(System.out::println);
+    }
 
+    public void listarLibrosPorIdioma(){
+        libros = repositorio.findAll();
+        List<String> idiomasUnicos = libros.stream()
+                .map(Libro::getIdioma)
+                .distinct() // Filter out duplicates
+                .collect(Collectors.toList());
+        idiomasUnicos.forEach(idioma -> {
+            switch (idioma){
+                case "en":
+                    System.out.println("en - english");
+                    break;
+                case "es":
+                    System.out.println("es - español");
+                    break;
+            }
+        });
+        System.out.println("");
+        System.out.println("Ingrese el idioma del que desea buscar los libros");
+        String idiomaBuscado = teclado.nextLine();
+        List<Libro> librosBuscados = libros.stream()
+                .filter(l->l.getIdioma().contains(idiomaBuscado))
+                .collect(Collectors.toList());
+        librosBuscados.forEach(System.out::println);
 
+    }
+
+/*
+EXTRAS:
+- Top 10 libros más descargados en la base de datos y en la API
+- Buscar autor por nombre
+- Listar autores con otras consultas.
+Por ejemplo: autores que hayan muerto hace más de 70 años.
+ */
+
+    public void buscarAutorPorNombre(){
+        System.out.println("Ingrese el nombre del autor que desea buscar");
+        var nombreAutor = teclado.nextLine();
+        autorBuscado = repositorio2.findByNombreContainingIgnoreCase(nombreAutor);
+        if(autorBuscado.isPresent()){
+            System.out.println(autorBuscado.get());
+        }else{
+            System.out.println("Autor no encontrado");
+        }
+    }
+
+    public void top10LibrosEnLaAPI() {
+        try {
+            String json = consumoAPI.obtenerDatos(URL_BASE + "?sort");
+
+            List<DatosLibro> datosLibros = conversor.obtenerDatosArray(json, DatosLibro.class);
+            List<DatosAutor> datosAutor = conversorAutor.obtenerDatosArray(json,DatosAutor.class);
+
+            List<Libro> libros = new ArrayList<>();
+            for (int i = 0; i < datosLibros.size(); i++) {
+                Autor autor = new Autor(
+                        datosAutor.get(i).nombre(),
+                        datosAutor.get(i).nacimiento(),
+                        datosAutor.get(i).deceso());
+
+                Libro libro = new Libro(
+                        datosLibros.get(i).titulo(),
+                        autor,
+                        datosLibros.get(i).idioma(),
+                        datosLibros.get(i).descargas());
+                libros.add(libro);
+            }
+
+            libros.sort(Comparator.comparingDouble(Libro::getDescargas).reversed());
+
+            List<Libro> top10Libros = libros.subList(0, Math.min(10, libros.size()));
+
+            for (int i = 0; i < top10Libros.size(); i++) {
+                System.out.println((i + 1) + ". " + top10Libros.get(i));
+            }
+
+        } catch (NullPointerException e) {
+            System.out.println("Error occurred: " + e.getMessage());
+        }
+    }
+
+    public void top5LibrosEnLaDB(){
+        try{
+            List<Libro> libros = repositorio.findAll();
+            List<Libro> librosOrdenados = libros.stream()
+                    .sorted(Comparator.comparingDouble(Libro::getDescargas).reversed())
+                    .collect(Collectors.toList());
+            List<Libro> top5Libros = librosOrdenados.subList(0, Math.min(5, librosOrdenados.size()));            for (int i = 0; i < top5Libros.size(); i++) {
+                System.out.println((i + 1) + ". " + top5Libros.get(i));
+            }
+        }catch(NullPointerException e){
+            System.out.println(e.getMessage());
+            libros = new ArrayList<>();
+        }
+    }
+
+    public void autoresEnDerechoPublico(){
+        try {
+            String json = consumoAPI.obtenerDatos(URL_BASE + "?sort");
+
+            List<DatosAutor> datosAutor = conversorAutor.obtenerDatosArray(json,DatosAutor.class);
+
+            List<Autor> autores = new ArrayList<>();
+
+            for (int i = 0; i < datosAutor.size(); i++) {
+                Autor autor = new Autor(
+                        datosAutor.get(i).nombre(),
+                        datosAutor.get(i).nacimiento(),
+                        datosAutor.get(i).deceso());
+
+                autores.add(autor);
+            }
+
+            List<Autor> autoresOrdenados = autores.stream()
+                    .filter(a->a.getDeceso()>1954)
+                    .collect(Collectors.toList());
+
+            List<Autor> diezAutores = autoresOrdenados.subList(0, Math.min(10, autoresOrdenados.size()));
+
+            for (int i = 0; i < diezAutores.size(); i++) {
+                System.out.println((i + 1) + ". " + diezAutores.get(i));
+            }
+
+        } catch (NullPointerException e) {
+            System.out.println("Error occurred: " + e.getMessage());
+        }
+    }
 
 }
