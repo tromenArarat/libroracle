@@ -44,7 +44,7 @@ public class Principal {
 
             switch (opcion) {
                 case 1:
-//                    buscarLibroPorTitulo();
+                    buscarLibroPorTitulo();
                     break;
                 case 2:
 //                    buscarLibrosRegistrados();
@@ -71,9 +71,7 @@ public class Principal {
     public Principal(LibroRepository repository) {
         this.repositorio = repository;
     }
-    private DatosLibro getDatosLibro() {
-        System.out.println("Escribe el nombre del libro que deseas buscar");
-        var nombreLibro = teclado.nextLine();
+    private DatosLibro getDatosLibro(String nombreLibro) {
         var json = consumoAPI.obtenerDatos(URL_BASE + "?search="+ nombreLibro.replace(" ", "+"));
         DatosLibro datos = conversor.obtenerDatos(json, DatosLibro.class);
         return datos;
@@ -84,34 +82,54 @@ public class Principal {
         return datos;
     }
 
-//    public void buscarLibroPorTitulo(){
-//        DatosLibro datos = getDatosLibro();
-//        if (datos != null) {
-//            Libro libro = new Libro();
-//            libro.setTitulo(datos.titulo());
+private String pregunta() {
+    System.out.println("Escribe el nombre del libro que deseas buscar");
+    var nombreLibro = teclado.nextLine();
+    return nombreLibro;
+    }
+
+    public void buscarLibroPorTitulo() {
+
+        String respuesta = pregunta();
+        DatosAutor datosAutor = getDatosAutor(respuesta);
+
+        System.out.println(datosAutor);
+
+        DatosLibro datos = getDatosLibro(respuesta);
+        System.out.println(datos);
+
+//        try {
+//            DatosLibro datos = getDatosLibro();
 //
-////            DatosAutor datosAutor = getDatosAutor(datos.titulo());
-////
-////            Autor autor = new Autor();
-////            autor.setNombre(datosAutor.nombre());
-////            autor.setNacimiento(datosAutor.nacimiento());
-////            autor.setDeceso(datosAutor.deceso());
-////
-////            libro.setAutor(autor);
+//                if (datos != null) {
+//                    Libro libro = new Libro();
+//                    libro.setTitulo(datos.titulo());
+//                    Autor autor = new Autor();
+//                    autor.setNombre(datosAutor.nombre());
+//                    autor.setNacimiento(datosAutor.nacimiento());
+//                    autor.setDeceso(datosAutor.deceso());
+//                    libro.setAutor(autor);
 //
-//            libro.setAutor(datos.autor());
+//                    libro.setIdioma(datos.idioma());
+//                    libro.setDescargas(datos.descargas());
 //
-//            libro.setIdioma(datos.idioma());
+//                    repositorio.save(libro);
+//                    System.out.println("Libro guardado exitosamente");
+//                } else {
+//                    System.out.println("No se encontró el autor para el libro");
+//                }
+//            } else {
+//                System.out.println("Libro no encontrado o título no especificado");
+//            }
 //
-//            libro.setDescargas(datos.descargas());
-//
-//            repositorio.save(libro);
-//            System.out.println("Libro guardado exitosamente");
-//        } else {
-//            System.out.println("Libro no encontrado o título no especificado");
+//        } catch (Exception e) {
+//            System.out.println("excepción: " + e.getMessage());
 //        }
-//
-//    }
+
+    }
+
+
+
 
 
 }

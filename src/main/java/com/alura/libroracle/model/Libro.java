@@ -2,6 +2,8 @@ package com.alura.libroracle.model;
 
 import jakarta.persistence.*;
 
+import java.util.OptionalDouble;
+
 @Entity
 @Table(name="libros")
 public class Libro {
@@ -19,12 +21,14 @@ public class Libro {
     public Libro() {
     }
 
-    public Libro(Long id, String titulo, Autor autor, Idioma idioma, Double descargas) {
-        id = id;
-        this.titulo = titulo;
-        this.autor = autor;
-        this.idioma = idioma;
-        this.descargas = descargas;
+
+
+    public Libro(DatosLibro datosLibro) {
+        this.id = id;
+        this.titulo = datosLibro.titulo();
+        this.autor = datosLibro.autor();
+        this.idioma = datosLibro.idioma().get(0);
+        this.descargas = OptionalDouble.of(Double.valueOf(datosLibro.descargas())).orElse(0);
     }
 
     public Long getId() {

@@ -14,8 +14,6 @@ public class Autor {
     private int nacimiento;
     private int deceso;
 
-    @OneToMany(mappedBy = "autor")
-    private List<Libro> libros;
     public Autor() {
     }
 
