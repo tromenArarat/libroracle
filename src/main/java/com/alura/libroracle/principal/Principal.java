@@ -9,10 +9,7 @@ import com.alura.libroracle.service.ConsumoAPI;
 import com.alura.libroracle.service.ConvierteDatos;
 import com.alura.libroracle.service.ConvierteDatosAutor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class Principal {
 
@@ -81,7 +78,15 @@ public class Principal {
         DatosAutor datos = conversorAutor.obtenerDatos(json, DatosAutor.class);
         return datos;
     }
+    public static Long generateUniqueId() {
+        UUID uuid = UUID.randomUUID();
+        long mostSignificantBits = uuid.getMostSignificantBits();
+        long leastSignificantBits = uuid.getLeastSignificantBits();
 
+        // Combine the most significant and least significant bits
+        // to get a long value
+        return mostSignificantBits ^ leastSignificantBits;
+    }
 private String pregunta() {
     System.out.println("Escribe el nombre del libro que deseas buscar");
     var nombreLibro = teclado.nextLine();
@@ -91,40 +96,42 @@ private String pregunta() {
     public void buscarLibroPorTitulo() {
 
         String respuesta = pregunta();
-        DatosAutor datosAutor = getDatosAutor(respuesta);
 
-        System.out.println(datosAutor);
 
-        DatosLibro datos = getDatosLibro(respuesta);
-        System.out.println(datos);
+        try {
+            DatosAutor datosAutor = getDatosAutor(respuesta);
+            DatosLibro datosLibro = getDatosLibro(respuesta);
+            System.out.println(datosAutor);
+            System.out.println(datosLibro);
 
-//        try {
-//            DatosLibro datos = getDatosLibro();
-//
-//                if (datos != null) {
-//                    Libro libro = new Libro();
-//                    libro.setTitulo(datos.titulo());
-//                    Autor autor = new Autor();
-//                    autor.setNombre(datosAutor.nombre());
-//                    autor.setNacimiento(datosAutor.nacimiento());
-//                    autor.setDeceso(datosAutor.deceso());
-//                    libro.setAutor(autor);
-//
-//                    libro.setIdioma(datos.idioma());
-//                    libro.setDescargas(datos.descargas());
-//
-//                    repositorio.save(libro);
-//                    System.out.println("Libro guardado exitosamente");
-//                } else {
-//                    System.out.println("No se encontró el autor para el libro");
-//                }
-//            } else {
-//                System.out.println("Libro no encontrado o título no especificado");
-//            }
-//
-//        } catch (Exception e) {
-//            System.out.println("excepción: " + e.getMessage());
-//        }
+                if (datosLibro != null && datosAutor != null) {
+
+                    Autor autor = new Autor(
+                            datosAutor.nombre(),
+                            datosAutor.nacimiento(),
+                            datosAutor.deceso()
+                    );
+
+
+                    Libro libro = new Libro(
+                            datosLibro.titulo(),
+                            autor,
+                            datosLibro.idioma() != null ? datosLibro.idioma() : Collections.emptyList(), // Ensure to handle empty idioma list
+                            datosLibro.descargas());
+
+
+                    System.out.println(libro);
+                    repositorio.save(libro);
+
+                    System.out.println("Libro guardado exitosamente");
+                } else {
+                    System.out.println("No se encontró el autor para el libro");
+                }
+
+
+        } catch (Exception e) {
+            System.out.println("excepción: " + e.getMessage());
+        }
 
     }
 

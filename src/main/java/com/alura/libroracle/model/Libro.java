@@ -2,6 +2,8 @@ package com.alura.libroracle.model;
 
 import jakarta.persistence.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.OptionalDouble;
 
 @Entity
@@ -11,11 +13,10 @@ public class Libro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String titulo;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "autor_id")
     private Autor autor;
-    @Enumerated(EnumType.STRING)
-    private Idioma idioma;
+    private String idioma;
     private Double descargas;
 
     public Libro() {
@@ -23,12 +24,11 @@ public class Libro {
 
 
 
-    public Libro(DatosLibro datosLibro) {
-        this.id = id;
-        this.titulo = datosLibro.titulo();
-        this.autor = datosLibro.autor();
-        this.idioma = datosLibro.idioma().get(0);
-        this.descargas = OptionalDouble.of(Double.valueOf(datosLibro.descargas())).orElse(0);
+    public Libro(String titulo, Autor autor, List<String> idiomas, Double descargas) {
+        this.titulo = titulo;
+        this.autor = autor;
+        this.idioma = idiomas != null && !idiomas.isEmpty() ? String.join(",", idiomas) : null;
+        this.descargas = OptionalDouble.of(descargas).orElse(0);
     }
 
     public Long getId() {
@@ -36,7 +36,7 @@ public class Libro {
     }
 
     public void setId(Long id) {
-        id = id;
+        this.id = id;
     }
 
     public String getTitulo() {
@@ -55,11 +55,11 @@ public class Libro {
         this.autor = autor;
     }
 
-    public Idioma getIdioma() {
+    public String getIdioma() {
         return idioma;
     }
 
-    public void setIdioma(Idioma idioma) {
+    public void setIdioma(String idioma) {
         this.idioma = idioma;
     }
 
