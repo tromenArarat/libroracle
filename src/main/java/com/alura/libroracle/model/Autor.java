@@ -2,7 +2,9 @@ package com.alura.libroracle.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "autores")
@@ -14,6 +16,8 @@ public class Autor {
     private int nacimiento;
     private int deceso;
 
+    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Libro> libros;
     public Autor() {
     }
 
@@ -23,6 +27,16 @@ public class Autor {
         this.deceso = deceso;
     }
 
+    public List<Libro> getLibros() {
+        if (libros == null) {
+            libros = new ArrayList<>();
+        }
+        return libros;
+    }
+
+    public void setLibros(List<Libro> libros) {
+        this.libros = libros;
+    }
     public Long getId() {
         return id;
     }
@@ -59,11 +73,13 @@ public class Autor {
 
     @Override
     public String toString() {
-        return "Autor{" +
-                "id=" + id +
-                ", nombre='" + nombre + '\'' +
-                ", nacimiento=" + nacimiento +
-                ", deceso=" + deceso +
-                '}';
+
+        return "Autor: " +  nombre + '\n' +
+                "Fecha de nacimiento: " + nacimiento +'\n'+
+                "Fecha de fallecimiento: " + deceso+'\n'+
+                "Libros: "+libros.stream()
+                    .map(l->l.getTitulo())
+                    .collect(Collectors.toList());
+
     }
 }
