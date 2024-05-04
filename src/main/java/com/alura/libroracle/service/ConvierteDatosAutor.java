@@ -49,7 +49,7 @@ public class ConvierteDatosAutor implements IConvierteDatos {
                 // Convert results array to a list of objects
                 List<T> resultList = new ArrayList<>();
                 for (int i = 0; i < resultsArray.size(); i++) {
-                    JsonNode firstResult = resultsArray.get(0).get("authors").get(0);
+                    JsonNode firstResult = resultsArray.get(i).get("authors").get(0);
                     T result = objectMapper.treeToValue(firstResult, clase);
                     resultList.add(result);
                 }

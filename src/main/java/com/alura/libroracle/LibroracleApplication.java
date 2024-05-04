@@ -25,7 +25,6 @@ public class LibroracleApplication implements CommandLineRunner {
 		Principal principal = new Principal(repository, repository2);
 		principal.muestraElMenu();
 
-
 	}
 
 

@@ -85,7 +85,7 @@ public class Principal {
                     System.out.println("Opción inválida");
             }
         }
-
+        System.exit(0);
     }
 
     public Principal(LibroRepository repository, AutorRepository repository2) {
@@ -223,7 +223,7 @@ private String pregunta() {
         libros = repositorio.findAll();
         List<String> idiomasUnicos = libros.stream()
                 .map(Libro::getIdioma)
-                .distinct() // Filter out duplicates
+                .distinct()
                 .collect(Collectors.toList());
         idiomasUnicos.forEach(idioma -> {
             switch (idioma){
@@ -318,24 +318,25 @@ Por ejemplo: autores que hayan muerto hace más de 70 años.
         try {
             String json = consumoAPI.obtenerDatos(URL_BASE + "?sort");
 
-            List<DatosAutor> datosAutor = conversorAutor.obtenerDatosArray(json,DatosAutor.class);
+            List<DatosAutor> datosAutor = conversorAutor.obtenerDatosArray(json, DatosAutor.class);
 
-            List<Autor> autores = new ArrayList<>();
+            Map<String, Autor> autoresMap = new HashMap<>();
 
-            for (int i = 0; i < datosAutor.size(); i++) {
-                Autor autor = new Autor(
-                        datosAutor.get(i).nombre(),
-                        datosAutor.get(i).nacimiento(),
-                        datosAutor.get(i).deceso());
-                List<Libro> libros = new ArrayList<>();
+            for (DatosAutor datoAutor : datosAutor) {
+                String nombre = datoAutor.nombre();
+                Autor autor = autoresMap.get(nombre);
 
-                autor.setLibros(libros);
+                if (autor == null) {
+                    autor = new Autor(nombre, datoAutor.nacimiento(), datoAutor.deceso());
+                    autoresMap.put(nombre, autor);
+                }
 
-                autores.add(autor);
+                List<Libro> librosArray = new ArrayList<>();
+                autor.setLibros(librosArray);
             }
 
-            List<Autor> autoresOrdenados = autores.stream()
-                    .filter(a->a.getDeceso()<1954)
+            List<Autor> autoresOrdenados = autoresMap.values().stream()
+                    .filter(a -> a.getDeceso() < 1954)
                     .collect(Collectors.toList());
 
             List<Autor> diezAutores = autoresOrdenados.subList(0, Math.min(10, autoresOrdenados.size()));
