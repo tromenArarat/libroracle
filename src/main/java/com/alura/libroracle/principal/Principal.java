@@ -42,7 +42,7 @@ public class Principal {
                     -- - - - EXTRAS - - - - 
                     6- buscar autorxs por nombre
                     7- top 10 libros en la API
-                    8- top 5 libros en mi la DB
+                    8- top 5 libros en la DB
                     9- autores en derecho público                                  
                     0 - Salir
                     """;
@@ -153,12 +153,12 @@ private String pregunta() {
 
                 if (datosLibro != null) {
                     DatosAutor datosAutor = getDatosAutor(libroBuscado);
-                    if (datosAutor != null) { // Check if the author data is not null
+                    if (datosAutor != null) {
                         List<Autor> autores = repositorio2.findAll();
                         autores = autores != null ? autores : new ArrayList<>();
 
                         Optional<Autor> pueta = autores.stream()
-                                .filter(a -> datosAutor.nombre() != null && // Ensure the author name is not null
+                                .filter(a -> datosAutor.nombre() != null &&
                                         a.getNombre().toLowerCase().contains(datosAutor.nombre().toLowerCase()))
                                 .findFirst();
 
@@ -327,12 +327,15 @@ Por ejemplo: autores que hayan muerto hace más de 70 años.
                         datosAutor.get(i).nombre(),
                         datosAutor.get(i).nacimiento(),
                         datosAutor.get(i).deceso());
+                List<Libro> libros = new ArrayList<>();
+
+                autor.setLibros(libros);
 
                 autores.add(autor);
             }
 
             List<Autor> autoresOrdenados = autores.stream()
-                    .filter(a->a.getDeceso()>1954)
+                    .filter(a->a.getDeceso()<1954)
                     .collect(Collectors.toList());
 
             List<Autor> diezAutores = autoresOrdenados.subList(0, Math.min(10, autoresOrdenados.size()));
