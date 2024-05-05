@@ -14,21 +14,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Principal {
-
     private ConsumoAPI consumoAPI = new ConsumoAPI();
     private ConvierteDatos conversor = new ConvierteDatos();
     private ConvierteDatosAutor conversorAutor = new ConvierteDatosAutor();
     private final String URL_BASE = "https://gutendex.com/books/";
     private Scanner teclado = new Scanner(System.in);
     private LibroRepository repositorio;
-
     private AutorRepository repositorio2;
     private List<Libro> libros;
     private List<Autor> autores;
-
     private Optional<Autor> autorBuscado;
-
-
     public void muestraElMenu() {
         var opcion = -1;
         while (opcion != 0) {
@@ -49,7 +44,6 @@ public class Principal {
             System.out.println(menu);
             opcion = teclado.nextInt();
             teclado.nextLine();
-
             switch (opcion) {
                 case 1:
                     buscarLibroPorTitulo();
@@ -87,7 +81,6 @@ public class Principal {
         }
         System.exit(0);
     }
-
     public Principal(LibroRepository repository, AutorRepository repository2) {
         this.repositorio = repository;
         this.repositorio2 = repository2;
@@ -102,21 +95,11 @@ public class Principal {
         DatosAutor datos = conversorAutor.obtenerDatos(json, DatosAutor.class);
         return datos;
     }
-    public static Long generateUniqueId() {
-        UUID uuid = UUID.randomUUID();
-        long mostSignificantBits = uuid.getMostSignificantBits();
-        long leastSignificantBits = uuid.getLeastSignificantBits();
-
-        // Combine the most significant and least significant bits
-        // to get a long value
-        return mostSignificantBits ^ leastSignificantBits;
-    }
 private String pregunta() {
     System.out.println("Escribe el nombre del libro que deseas buscar");
     var nombreLibro = teclado.nextLine();
     return nombreLibro;
     }
-
     private void mostrarLibrosBuscados(){
         try{
             List<Libro> libros = repositorio.findAll();
@@ -127,8 +110,6 @@ private String pregunta() {
             System.out.println(e.getMessage());
             libros = new ArrayList<>();
         }
-
-
     }
 
     public void buscarLibroPorTitulo() {
@@ -199,7 +180,6 @@ private String pregunta() {
                 System.out.println("excepción: " + e.getMessage());
             }
         }
-
 }
 
     public void mostrarAutorxsRegistradxs(){
@@ -213,7 +193,7 @@ private String pregunta() {
         int anio = teclado.nextInt();
         autores = repositorio2.findAll();
         List<String> autoresNombre = autores.stream()
-                .filter(a->a.getDeceso()<anio&&a.getNacimiento()>anio)
+                .filter(a-> (a.getDeceso() >= anio) && (a.getNacimiento() <= anio))
                 .map(a->a.getNombre())
                 .collect(Collectors.toList());
         autoresNombre.forEach(System.out::println);
@@ -245,13 +225,13 @@ private String pregunta() {
 
     }
 
-/*
-EXTRAS:
-- Top 10 libros más descargados en la base de datos y en la API
-- Buscar autor por nombre
-- Listar autores con otras consultas.
-Por ejemplo: autores que hayan muerto hace más de 70 años.
- */
+    /*
+    EXTRAS:
+    - Top 10 libros más descargados en la base de datos y en la API
+    - Buscar autor por nombre
+    - Listar autores con otras consultas.
+    Por ejemplo: autores que hayan muerto hace más de 70 años.
+     */
 
     public void buscarAutorPorNombre(){
         System.out.println("Ingrese el nombre del autor que desea buscar");
@@ -342,7 +322,8 @@ Por ejemplo: autores que hayan muerto hace más de 70 años.
             List<Autor> diezAutores = autoresOrdenados.subList(0, Math.min(10, autoresOrdenados.size()));
 
             for (int i = 0; i < diezAutores.size(); i++) {
-                System.out.println((i + 1) + ". " + diezAutores.get(i));
+                System.out.println((i + 1) + ". " + diezAutores.get(i).getNombre()+"/n"+
+                        ", año de fallecimiento: "+diezAutores.get(i).getDeceso());
             }
 
         } catch (NullPointerException e) {
